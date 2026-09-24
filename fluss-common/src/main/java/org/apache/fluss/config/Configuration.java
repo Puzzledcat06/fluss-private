@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -759,19 +760,12 @@ public class Configuration implements Serializable, ReadableConfig {
         } else if (obj instanceof Configuration) {
             Map<String, Object> otherConf = ((Configuration) obj).confData;
 
-            for (Map.Entry<String, Object> e : this.confData.entrySet()) {
-                Object thisVal = e.getValue();
-                Object otherVal = otherConf.get(e.getKey());
+            if (this.confData.size() != otherConf.size()) {
+                return false;
+            }
 
-                if (!thisVal.getClass().equals(byte[].class)) {
-                    if (!thisVal.equals(otherVal)) {
-                        return false;
-                    }
-                } else if (otherVal.getClass().equals(byte[].class)) {
-                    if (!Arrays.equals((byte[]) thisVal, (byte[]) otherVal)) {
-                        return false;
-                    }
-                } else {
+            for (Map.Entry<String, Object> e : this.confData.entrySet()) {
+                if (!Objects.deepEquals(e.getValue(), otherConf.get(e.getKey()))) {
                     return false;
                 }
             }
