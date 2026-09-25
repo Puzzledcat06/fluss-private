@@ -561,6 +561,24 @@ public class ConfigurationTest {
                 .hasMessageNotContaining("secret_value");
     }
 
+    @Test
+    void testEqualsWithByteArrayKeyMissingInOther() {
+        Configuration a = new Configuration();
+        a.setBytes("k", new byte[] {1, 2, 3});
+        Configuration b = new Configuration();
+
+        assertThat(a.equals(b)).isFalse();
+    }
+
+    @Test
+    void testEqualsIsSymmetric() {
+        Configuration a = new Configuration();
+        Configuration b = new Configuration();
+        b.setString("extra", "value");
+
+        assertThat(a.equals(b)).isEqualTo(b.equals(a));
+    }
+
     // --------------------------------------------------------------------------------------------
     // Test classes
     // --------------------------------------------------------------------------------------------
