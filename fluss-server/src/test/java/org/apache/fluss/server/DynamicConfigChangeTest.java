@@ -158,8 +158,7 @@ public class DynamicConfigChangeTest {
                                                             "value",
                                                             AlterConfigOpType.SET))))
                     .isExactlyInstanceOf(ConfigException.class)
-                    .hasMessageContaining(
-                            "The config key un_support_key is not allowed to be changed dynamically.");
+                    .hasMessageContaining("The config key un_support_key does not exist.");
 
             dynamicConfigManager.alterConfigs(
                     Arrays.asList(

@@ -566,9 +566,7 @@ public abstract class FlinkProcedureITCase {
                                                         CATALOG_NAME))
                                         .await())
                 .rootCause()
-                // TODO: Fix misleading error: non-existent key reported as not allowed.
-                .hasMessageContaining(
-                        "The config key invalid.config.key is not allowed to be changed dynamically");
+                .hasMessageContaining("The config key invalid.config.key does not exist");
 
         // validation to ensure an even number of arguments are passed
         assertThatThrownBy(
@@ -624,9 +622,7 @@ public abstract class FlinkProcedureITCase {
                                                         CATALOG_NAME))
                                         .await())
                 .rootCause()
-                // TODO: Fix misleading error: non-existent key reported as not allowed.
-                .hasMessageContaining(
-                        "The config key invalid.config.key is not allowed to be changed dynamically");
+                .hasMessageContaining("The config key invalid.config.key does not exist");
 
         // Try to no parameters passed
         assertThatThrownBy(

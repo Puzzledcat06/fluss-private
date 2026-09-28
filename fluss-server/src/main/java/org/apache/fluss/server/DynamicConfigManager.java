@@ -192,6 +192,10 @@ public class DynamicConfigManager {
                 alterConfigOp -> {
                     String configKey = alterConfigOp.key();
                     if (!dynamicServerConfig.isAllowedConfig(configKey)) {
+                        if (!dynamicServerConfig.isKnownConfig(configKey)) {
+                            throw new ConfigException(
+                                    String.format("The config key %s does not exist.", configKey));
+                        }
                         throw new ConfigException(
                                 String.format(
                                         "The config key %s is not allowed to be changed dynamically.",
