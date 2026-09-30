@@ -557,7 +557,7 @@ public abstract class FlinkProcedureITCase {
 
     @Test
     void testSetClusterConfigsValidation() throws Exception {
-        // Try to set an invalid config (not allowed for dynamic change)
+        // Try to set a config key that does not exist
         assertThatThrownBy(
                         () ->
                                 tEnv.executeSql(
@@ -613,7 +613,7 @@ public abstract class FlinkProcedureITCase {
 
     @Test
     void testResetClusterConfigsValidation() throws Exception {
-        // Try to reset an invalid config
+        // Try to reset a config key that does not exist
         assertThatThrownBy(
                         () ->
                                 tEnv.executeSql(

@@ -191,6 +191,43 @@ public class DynamicConfigChangeTest {
     }
 
     @Test
+    void testAlterConfigKeyExistenceMessages() throws Exception {
+        try (LakeCatalogDynamicLoader lakeCatalogDynamicLoader =
+                new LakeCatalogDynamicLoader(new Configuration(), null, true)) {
+            DynamicConfigManager dynamicConfigManager = createManager(new Configuration());
+            dynamicConfigManager.register(lakeCatalogDynamicLoader);
+            dynamicConfigManager.startup();
+
+            // Unknown key -> "does not exist"
+            assertThatThrownBy(
+                            () ->
+                                    dynamicConfigManager.alterConfigs(
+                                            Collections.singletonList(
+                                                    new AlterConfig(
+                                                            "un_support_key",
+                                                            "value",
+                                                            AlterConfigOpType.SET))))
+                    .isExactlyInstanceOf(ConfigException.class)
+                    .hasMessageContaining("The config key un_support_key does not exist.");
+
+            // Known but not dynamically allowed -> "not allowed to be changed dynamically"
+            assertThatThrownBy(
+                            () ->
+                                    dynamicConfigManager.alterConfigs(
+                                            Collections.singletonList(
+                                                    new AlterConfig(
+                                                            ConfigOptions.BIND_LISTENERS.key(),
+                                                            "localhost:9999",
+                                                            AlterConfigOpType.SET))))
+                    .isExactlyInstanceOf(ConfigException.class)
+                    .hasMessageContaining(
+                            String.format(
+                                    "The config key %s is not allowed to be changed dynamically.",
+                                    ConfigOptions.BIND_LISTENERS.key()));
+        }
+    }
+
+    @Test
     void testOverrideConfigs() throws Exception {
         Configuration configuration = new Configuration();
         configuration.setString(DATALAKE_FORMAT.key(), "paimon");
