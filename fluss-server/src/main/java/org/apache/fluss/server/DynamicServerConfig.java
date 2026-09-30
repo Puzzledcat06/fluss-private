@@ -216,6 +216,19 @@ class DynamicServerConfig {
         return false;
     }
 
+    /**
+     * Returns whether the given key refers to a known configuration option, regardless of whether
+     * it may be changed dynamically. Used to tell "unknown key" apart from "known but not allowed".
+     *
+     * <p>This is only called after {@link #isAllowedConfig(String)} has returned false, so a key
+     * matching {@link #ALLOWED_CONFIG_PREFIXES} would already have returned true there; no separate
+     * prefix check is needed here. Note this is an exact-key lookup: a deprecated fallback key that
+     * is not the option's primary {@code ConfigOption.key()} will be reported as "does not exist".
+     */
+    boolean isKnownConfig(String key) {
+        return ConfigOptions.getConfigOption(key) != null;
+    }
+
     private void updateCurrentConfig(
             Map<String, String> newDynamicConfigs,
             boolean skipErrorConfig,
