@@ -568,15 +568,56 @@ public class ConfigurationTest {
         Configuration b = new Configuration();
 
         assertThat(a.equals(b)).isFalse();
+        assertThat(b.equals(a)).isFalse();
     }
 
     @Test
-    void testEqualsIsSymmetric() {
+    void testEqualsWithByteArrayContentEquality() {
+        Configuration a = new Configuration();
+        a.setBytes("k", new byte[] {1, 2, 3});
+        Configuration b = new Configuration();
+        b.setBytes("k", new byte[] {1, 2, 3});
+
+        assertThat(a.equals(b)).isTrue();
+        assertThat(b.equals(a)).isTrue();
+
+        Configuration c = new Configuration();
+        c.setBytes("k", new byte[] {9, 9, 9});
+
+        assertThat(a.equals(c)).isFalse();
+        assertThat(c.equals(a)).isFalse();
+    }
+
+    @Test
+    void testEqualsIsSymmetricForEmptyVsNonEmpty() {
         Configuration a = new Configuration();
         Configuration b = new Configuration();
         b.setString("extra", "value");
 
-        assertThat(a.equals(b)).isEqualTo(b.equals(a));
+        assertThat(a.equals(b)).isFalse();
+        assertThat(b.equals(a)).isFalse();
+    }
+
+    @Test
+    void testEqualsWithSameSizeDifferentKeys() {
+        Configuration a = new Configuration();
+        a.setString("k1", "v");
+        Configuration b = new Configuration();
+        b.setString("k2", "v");
+
+        assertThat(a.equals(b)).isFalse();
+        assertThat(b.equals(a)).isFalse();
+    }
+
+    @Test
+    void testHashCodeConsistentWithEquals() {
+        Configuration a = new Configuration();
+        a.setString("x", "1");
+        Configuration b = new Configuration();
+        b.setString("x", "1");
+
+        assertThat(a.equals(b)).isTrue();
+        assertThat(a.hashCode()).isEqualTo(b.hashCode());
     }
 
     // --------------------------------------------------------------------------------------------
