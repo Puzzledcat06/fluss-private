@@ -138,7 +138,7 @@ public class FlussRowToJsonConverters {
     private FlussRowToJsonConverter createTimeConverter() {
         return (mapper, reuse, value) -> {
             int milliseconds = (int) value;
-            LocalTime time = LocalTime.ofSecondOfDay(milliseconds / 1000L);
+            LocalTime time = LocalTime.ofNanoOfDay((long) milliseconds * 1_000_000L);
             return mapper.getNodeFactory().textNode(SQL_TIME_FORMAT.format(time));
         };
     }

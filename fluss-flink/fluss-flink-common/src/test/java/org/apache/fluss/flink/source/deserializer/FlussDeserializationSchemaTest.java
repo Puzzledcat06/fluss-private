@@ -258,6 +258,24 @@ public class FlussDeserializationSchemaTest {
     }
 
     @Test
+    public void testJsonStringDeserializeTimeWithSubSecondPrecision() throws Exception {
+        List<DataField> sourceFields =
+                Collections.singletonList(new DataField("timeWithoutTimeZone", DataTypes.TIME()));
+        RowType sourceRowType = new RowType(sourceFields);
+
+        GenericRow row = new GenericRow(1);
+        // 10:00:00.500 expressed as milliseconds since midnight
+        row.setField(0, 36000500);
+        ScanRecord scanRecord = new ScanRecord(row);
+
+        JsonStringDeserializationSchema deserializer = new JsonStringDeserializationSchema();
+        deserializer.open(new DeserializerInitContextImpl(null, null, sourceRowType));
+        String result = deserializer.deserialize(scanRecord);
+
+        assertThat(result).contains("\"timeWithoutTimeZone\":\"10:00:00.5\"");
+    }
+
+    @Test
     public void testStringGetProducedType() {
         // Create deserializer
         JsonStringDeserializationSchema deserializer = new JsonStringDeserializationSchema();
