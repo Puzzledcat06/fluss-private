@@ -18,11 +18,13 @@
 package org.apache.fluss.flink.utils;
 
 import org.apache.fluss.row.Decimal;
+import org.apache.fluss.row.InternalArray;
 import org.apache.fluss.row.InternalRow;
 import org.apache.fluss.row.TimestampLtz;
 import org.apache.fluss.row.TimestampNtz;
 import org.apache.fluss.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.fluss.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.fluss.shaded.jackson2.com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.fluss.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.fluss.types.ArrayType;
 import org.apache.fluss.types.DataField;
@@ -192,8 +194,24 @@ public class FlussRowToJsonConverters {
     }
 
     private FlussRowToJsonConverter createArrayConverter(ArrayType type) {
-        // TODO
-        return null;
+        DataType elementType = type.getElementType();
+        FlussRowToJsonConverter elementConverter = createNullableConverter(elementType);
+        InternalArray.ElementGetter elementGetter = InternalArray.createElementGetter(elementType);
+        return (mapper, reuse, value) -> {
+            ArrayNode node = mapper.createArrayNode();
+            InternalArray array = (InternalArray) value;
+            int size = array.size();
+            for (int i = 0; i < size; i++) {
+                try {
+                    Object element = elementGetter.getElementOrNull(array, i);
+                    node.add(elementConverter.convert(mapper, null, element));
+                } catch (Throwable t) {
+                    throw new RuntimeException(
+                            String.format("Fail to convert to json at array index: %d.", i), t);
+                }
+            }
+            return node;
+        };
     }
 
     private FlussRowToJsonConverter createMapConverter(

@@ -23,6 +23,7 @@ import org.apache.fluss.flink.source.testutils.OrderDeserializationSchema;
 import org.apache.fluss.record.ChangeType;
 import org.apache.fluss.row.BinaryString;
 import org.apache.fluss.row.Decimal;
+import org.apache.fluss.row.GenericArray;
 import org.apache.fluss.row.GenericRow;
 import org.apache.fluss.row.TimestampLtz;
 import org.apache.fluss.row.TimestampNtz;
@@ -255,6 +256,29 @@ public class FlussDeserializationSchemaTest {
                         "{\"offset\":-1,\"timestamp\":-1,\"change_type\":\"INSERT\",\"row\":"
                                 + changedRowJson
                                 + "}");
+    }
+
+    @Test
+    public void testJsonStringDeserializeArrayOfStrings() throws Exception {
+        List<DataField> sourceFields =
+                Collections.singletonList(
+                        new DataField("tags", DataTypes.ARRAY(DataTypes.STRING())));
+        RowType sourceRowType = new RowType(sourceFields);
+
+        GenericRow row = new GenericRow(1);
+        row.setField(
+                0,
+                new GenericArray(
+                        new BinaryString[] {
+                            BinaryString.fromString("a"), BinaryString.fromString("b")
+                        }));
+        ScanRecord scanRecord = new ScanRecord(row);
+
+        JsonStringDeserializationSchema deserializer = new JsonStringDeserializationSchema();
+        deserializer.open(new DeserializerInitContextImpl(null, null, sourceRowType));
+        String result = deserializer.deserialize(scanRecord);
+
+        assertThat(result).contains("\"tags\":[\"a\",\"b\"]");
     }
 
     @Test
